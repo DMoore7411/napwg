@@ -1,0 +1,41 @@
+NAPWG - Not Another PassWord Generator
+
+Description
+
+napwg is a command line tool for generate strong passwords.
+
+napwg consists of a single, stand-alone executable file which does not 
+require or keeps any special config or data files, each time napwg is 
+called all entropy sources are calculated from scratch. napwg uses 
+several sources simultaneously to produce strong unpredictably passwords.
+
+This program is free software: you can redistribute it and/or modify it 
+under the terms of the GNU General Public License as published by the 
+Free Software Foundation, either version 3 of the License, or (at your 
+option) any later version.
+
+
+Requirements
+
+napwg requires to run:
+- OpenRK 0.23.x.x or higher
+
+to build and install:
+- C compiler 
+- make utility (eg, GNU make)
+- OpenRk header
+
+Installing 
+
+Unpack the archive tarball change to the created directory and run the 
+following commands:
+
+    $ make
+    $ make install (as root, or using sudo)
+
+
+Running
+
+To run napwg, simply type 'napwg' followed by the command line arguments,
+type 'napwg -h' or 'napwg -help' to see the help
+
