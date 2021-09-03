@@ -33,7 +33,6 @@ void print_about()
   printf("Copyright © 2021 David Moore\n");
   printf("This program comes with absolutely no warranty.\n");
   printf("See the GNU General Public License, version 3 or later for details.\n");
-  printf("Please report bugs to <https://bugs.napwg.org>.\n");
 
   return;
 }
