@@ -199,7 +199,7 @@ int sbbxtr_pass(sbbxtr_attr* attr, rk_mt64_t *st, char *pw)
   for(i=0; i<attr->len; i++)
   {
     cnt = tdr_mk(attr, tdr);
-    rkShuffleU8(st, &rkmt64Get, (uint8_t *)tdr, cnt, cnt);
+    rkShuffledurstenfeldU8(st, &rkmt64Get, (uint8_t *)tdr, cnt);
     do 
       h = rkmt64Get(st) % 127;
         while(h>=cnt);

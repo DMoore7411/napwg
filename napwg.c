@@ -3,7 +3,7 @@
 * NAPWG - Not Another PassWord Generator                                       *
 * a program to generate strong passwords                                       *
 *                                                                              *
-* Copyright (C) 2021 David Moore                                               *
+* Copyright (C) 2021-2022 David Moore                                          *
 *                                                                              *
 * This program is free software: you can redistribute it and/or modify it      *
 * under the terms of the GNU General Public License as published by the Free   *
@@ -29,13 +29,18 @@
 
 void print_about()
 {
-  printf("\nNAPWG - Not Another PassWord Generator - version 1.0\na program to generate strong passwords\n");
-  printf("Copyright © 2021 David Moore\n");
+  printf("\nNAPWG - Not Another PassWord Generator - version 1.1\na program to generate strong passwords\n");
+  printf("Copyright © 2021-2022 David Moore \n");
   printf("This program comes with absolutely no warranty.\n");
   printf("See the GNU General Public License, version 3 or later for details.\n");
+  printf("<https://github.com/DMoore7411/napwg>.\n");
 
   return;
 }
+
+/*
+abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 $+=^|~ !"#%&*,-./:;?@\_ ()<>[]{}
+ * */
 
 void print_help()
 {
@@ -44,15 +49,23 @@ void print_help()
   printf("-h -help         shows this information and quit\n");
   printf("-v -version      shows version and about information and quit\n\n");
   printf("-l -lower        include lowercase letters in the password\n");
+  printf("                 'abcdefghijklmnopqrstuvwxyz'\n");
   printf("-u -upper        include uppercase letters in the password\n");
+  printf("                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'\n");
   printf("-n -number       include numbers in the password\n");
+  printf("                 '0123456789'\n");
   printf("-s -symbol       include symbols in the password\n");
+  printf("                 '$+=^|~'\n");
   printf("-p -punctuation  include punctuation symbols in the password\n");
+  char puncs[]="                 '!\"#\%&*,-./:;?@\\_'";
+  printf("%s\n", puncs);
   printf("-b -bracket      include bracket symbols in the password\n");
-  printf("-a -all          include all sets in the password\n\n");
+  printf("                 '()<>[]{}'\n");
+  printf("-a -all          include all previous sets in the password\n\n");
+  printf("The lowercase letters set is used by default if none is selected\n\n");
   printf("-r -renew        renew generator state between passwords\n");
   printf("-i -info         shows entropy sources information\n");
-  printf("-e -entropy      shows password entropy\n");
+  printf("-e -entropy      shows password entropy estimation\n");
   printf("\n[ pw length ]    an integer number >= 8 (mandatory)\n");
   printf("\n[ pw num ]       if omitted napwg generates only one password\n");
   
@@ -85,6 +98,8 @@ int main (int argc, char *argv[], char *envp[])
   int ifo=0;
   int ent=0;
   char *pw;
+  
+  uint64_t src;
   
   sbbxtr_attr context;
   rk_mt64_t *rng;
@@ -205,16 +220,8 @@ int main (int argc, char *argv[], char *envp[])
   if(rng==NULL)
     return 0;
   
-  /* strong fill the state of mt64  */
-#if defined(__amd64__) || defined(__x86_64__) || defined(_M_X64)
-  rkRandomizeArray(RK_RDZS_MTIME | RK_RDZS_NTIME | RK_RDZS_CPUCYCLE | RK_RDZS_RDRAND | RK_RDZS_RDSEED,
-#else
-  rkRandomizeArray(RK_RDZS_MTIME | RK_RDZS_NTIME, 
-#endif 
-                   rng->k, 
-                   312, 
-                   RK_GFLAG_NOTALLZERO, 
-                   &err);
+  src = rkGetRandomizationSources() & (RK_RDZS_MTIME | RK_RDZS_NTIME | RK_RDZS_CPUCYCLE | RK_RDZS_RDRAND | RK_RDZS_RDSEED);
+  rkRandomizeArray(src, rng->k, 312, RK_GFLAG_NOTALLZERO, &err);
   
   pw=malloc(length);
     
@@ -224,15 +231,7 @@ int main (int argc, char *argv[], char *envp[])
       return 0;
     printf("%s\n", pw);
     if(renew==1 && i<num)
- #if defined(__amd64__) || defined(__x86_64__) || defined(_M_X64)
-      rkRandomizeArray(RK_RDZS_MTIME | RK_RDZS_NTIME | RK_RDZS_CPUCYCLE | RK_RDZS_RDRAND | RK_RDZS_RDSEED,
-#else
-      rkRandomizeArray(RK_RDZS_MTIME | RK_RDZS_NTIME, 
-#endif 
-                       rng->k, 
-                       312, 
-                       RK_GFLAG_NOTALLZERO, 
-                       &err);
+      rkRandomizeArray(src, rng->k, 312, RK_GFLAG_NOTALLZERO, &err);
   }
   
   free(pw);
