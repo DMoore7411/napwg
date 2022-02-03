@@ -4,7 +4,7 @@
 #* NAPWG - Not Another PassWord Generator                                       *
 #* Makefile - napwg component                                                   *
 #*                                                                              *
-#* Copyright (C) 2021 David Moore                                               *
+#* Copyright (C) 2021-2022 David Moore                                          *
 #*                                                                              *
 #* This program is free software: you can redistribute it and/or modify it      *
 #* under the terms of the GNU General Public License as published by the Free   *
