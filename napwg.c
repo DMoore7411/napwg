@@ -29,7 +29,7 @@
 
 void print_about()
 {
-  printf("\nNAPWG - Not Another PassWord Generator - version 1.1\na program to generate strong passwords\n");
+  printf("\nNAPWG - Not Another PassWord Generator - version 1.2\na program to generate strong passwords\n");
   printf("Copyright © 2021-2022 David Moore \n");
   printf("This program comes with absolutely no warranty.\n");
   printf("See the GNU General Public License, version 3 or later for details.\n");
@@ -37,10 +37,6 @@ void print_about()
 
   return;
 }
-
-/*
-abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 $+=^|~ !"#%&*,-./:;?@\_ ()<>[]{}
- * */
 
 void print_help()
 {
@@ -64,11 +60,12 @@ void print_help()
   printf("-a -all          include all previous sets in the password\n\n");
   printf("The lowercase letters set is used by default if none is selected\n\n");
   printf("-r -renew        renew generator state between passwords\n");
-  printf("-i -info         shows entropy sources information\n");
+  printf("-d -devrandom    use devrandom as additional randomness source\n\n");
+  printf("-i -info         shows randomness sources used\n");
   printf("-e -entropy      shows password entropy estimation\n");
+  printf("-c -classify     shows password strength classification\n");
   printf("\n[ pw length ]    an integer number >= 8 (mandatory)\n");
   printf("\n[ pw num ]       if omitted napwg generates only one password\n");
-  
   printf("\n");
     
   return;
@@ -95,8 +92,10 @@ int main (int argc, char *argv[], char *envp[])
   int length;
   int num;
   int renew=0;
+  int dev = 0;
   int ifo=0;
   int ent=0;
+  int clss = 0;
   char *pw;
   
   uint64_t src;
@@ -157,12 +156,18 @@ int main (int argc, char *argv[], char *envp[])
     
     if(chk_arg_str(argv[i], "-r", "-renew"))
       renew=1;
+      
+    if(chk_arg_str(argv[i], "-d", "-devrandom"))
+      dev=RK_RDZS_DEVRANDOM;
     
     if(chk_arg_str(argv[i], "-i", "-info"))
       ifo=1;
       
     if(chk_arg_str(argv[i], "-e", "-entropy"))
       ent=1;  
+    
+    if(chk_arg_str(argv[i], "-c", "-classify"))
+      clss=1;
   }
   
   if(argc==2)
@@ -191,12 +196,17 @@ int main (int argc, char *argv[], char *envp[])
   
   if(length<8)
     length=8;
+    
+  rkerrorInit(&err);
+  rng = rkmt64New(&err);
+  if(rng==NULL)
+    return 0;
   
   sbbxtr_set_length(&context, length);
+  src = rkGetRandomizationSources() & (RK_RDZS_MTIME | RK_RDZS_NTIME | RK_RDZS_CPUCYCLE | RK_RDZS_RDRAND | RK_RDZS_RDSEED | dev);
   
   if(ifo)
   {
-    uint64_t src = rkGetRandomizationSources();
     if(src & RK_RDZS_MTIME)
       printf("MICROTIME ");
     if(src & RK_RDZS_NTIME)
@@ -206,23 +216,28 @@ int main (int argc, char *argv[], char *envp[])
     if(src & RK_RDZS_RDRAND)
       printf("RDRAND ");
     if(src & RK_RDZS_RDSEED)
-      printf("RDSEED ");    
+      printf("RDSEED ");
+    if(src & RK_RDZS_DEVRANDOM)
+      printf("DEVRANDOM ");    
   }
   
   if(ent)
-    printf("- %i Bits", (int)sbbxtr_get_entropy(&context));
+    printf(" %i Bits", (int)sbbxtr_get_entropy(&context));
+    
+  if(clss)
+  {
+	int rate = (int)sbbxtr_get_entropy(&context);
+	if(rate < 28)printf("  Very Weak");  
+	if(rate >= 28 && rate < 36)printf("  Weak");
+	if(rate >= 36 && rate < 60)printf("  Reasonable");  
+	if(rate >= 60 && rate < 128)printf("  Strong");  
+	if(rate >= 128)printf("  Very Strong");
+  }
   
-  if(ifo|ent)
+  if(ifo|ent|clss)
     printf("\n"); 
   
-  rkerrorInit(&err);
-  rng = rkmt64New(&err);
-  if(rng==NULL)
-    return 0;
-  
-  src = rkGetRandomizationSources() & (RK_RDZS_MTIME | RK_RDZS_NTIME | RK_RDZS_CPUCYCLE | RK_RDZS_RDRAND | RK_RDZS_RDSEED);
   rkRandomizeArray(src, rng->k, 312, RK_GFLAG_NOTALLZERO, &err);
-  
   pw=malloc(length);
     
   for(i=0; i<num; i++)
