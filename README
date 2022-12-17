@@ -8,7 +8,7 @@ napwg consists of a single, stand-alone executable file which does not
 require or keeps any special config or data files, each time napwg is 
 called all randomness sources are calculated from scratch. napwg uses 
 several sources simultaneously to produce strong unpredictably passwords,
-this include sources like time clipping in micro and nano precission, but
+this include sources like time clipping in micro and nano precision, but
 also intructions presented in modern cpus like rdrand and rdseed.
 
 This program is free software: you can redistribute it and/or modify it 
