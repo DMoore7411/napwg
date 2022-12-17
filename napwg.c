@@ -25,6 +25,7 @@
 *******************************************************************************/
 
 #include <openrk.h>
+#include <stdlib.h>
 #include "subboxter.h"
 
 void print_about()

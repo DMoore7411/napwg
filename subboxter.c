@@ -192,7 +192,7 @@ int sbbxtr_pass(sbbxtr_attr* attr, rk_mt64_t *st, char *pw)
   int i;
   int cnt=0;
   char tdr[128];
-  uint h;
+  unsigned long h;
   
   sbbxtr_chk(attr);
   
